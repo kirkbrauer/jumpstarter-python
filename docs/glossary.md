@@ -2,33 +2,30 @@
 
 ## Acronyms
 
-* `DUT`: Device Under Test
+* `DUT`: Device Under Test - the device that is being tested using Jumpstarter.
 
 ## Entities
 
-* `exporter`: A linux service that exports the interfaces to the DUTs.
+* `Exporter`: A Linux service that exports the interfaces to the DUTs.
   An exporter connects directy to a Jumpstarter server or directly to a client.
 
-* `client`: A Developer or a CI/CD pipeline that connects to the Jumpstarter server
-  and leases exporters. The client can run tests on the leased
-  resources.
+* `Device`: A DUT that is exposed on an exporter. The exporter interacts with a
+  device through its exposed interfaces.
 
-* `controller`: The central service that authenticates and connects the exporters
-  and clients, manages leases and provides an inventory of available exporters and
-  clients.
+* `Client`: The library that connects to the server and leases exporters.
+  The client can interact with the leased exporters through the exporter.
+
+* `Controller`: The central service that authenticates and connects the exporters
+  and clients, manages leases, and provides an inventory of available exporters
+  and clients.
+
+* `Router`: The service that handles routing of messages between clients and
+  exporters once they are authenticated by the controller.
 
 ## Concepts
 
-* `Device`: a device that is exposed on a exporter, the exporter enumerates those
-  devices and makes them available for use in tests. Examples of resources can be:
-  * network interface
-  * serial port
-  * GPIO pin
-  * Storage device (USB Muxer, SD-Wire, etc.)
-  * a CAN bus interface
+* `Lease`: A time-limited reservation of a exporter, a lease is created by a client
+  and allows the client to access the exported interfaces for a period of time.
 
-* `Lease`: a time limited reservation of a exporter, a lease is created by a client
-  and allows the client to use the exporter resources for a limited time.
-
-* `DriverClass`: is the name of the driver class that is used to interact with
-  the exporter resources.
+* `Driver`: A class that is defined to interact with a specific type of interface
+  exposed by the exporter to the client.
