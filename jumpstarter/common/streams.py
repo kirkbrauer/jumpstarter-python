@@ -27,14 +27,12 @@ async def forward_server_stream(request_iterator, stream):
 
 
 async def forward_client_stream(router, stream, metadata):
-    async with create_task_group() as tg:
-
-        async def client_to_server():
-            try:
-                async for payload in stream:
-                    yield router_pb2.StreamRequest(payload=payload)
-            except BrokenResourceError:
-                pass
+    async def client_to_server():
+        try:
+            async for payload in stream:
+                yield router_pb2.StreamRequest(payload=payload)
+        except BrokenResourceError:
+            pass
 
     # server_to_client
     try:
@@ -42,6 +40,8 @@ async def forward_client_stream(router, stream, metadata):
             client_to_server(),
             metadata=metadata,
         ):
+            if not frame.payload:
+                break
             await stream.send(frame.payload)
     except grpc.aio.AioRpcError:
         # TODO: handle connection error
@@ -49,7 +49,7 @@ async def forward_client_stream(router, stream, metadata):
     except BrokenResourceError:
         pass
     finally:
-        await stream.send_eof()
+        await stream.aclose()
 
 
 async def connect_router_stream(endpoint, token, stream):

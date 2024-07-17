@@ -5,25 +5,27 @@ from jumpstarter.v1 import (
 )
 from jumpstarter.common.streams import forward_server_stream, create_memory_stream
 from jumpstarter.common import Metadata
-from jumpstarter.drivers import DriverBase, Session
+from jumpstarter.drivers import DriverBase, ContextStore
 from jumpstarter.drivers.composite import Composite
 from uuid import UUID, uuid4
 from dataclasses import dataclass, asdict, is_dataclass
 from google.protobuf import struct_pb2, json_format
-from typing import List
 from collections import ChainMap
-import itertools
 
 
 @dataclass(kw_only=True)
-class ExporterSession:
-    session: Session
-    devices: List[DriverBase]
+class Session(
+    jumpstarter_pb2_grpc.ExporterServiceServicer,
+    router_pb2_grpc.RouterServiceServicer,
+    Metadata,
+):
+    root_device: DriverBase
     mapping: dict[UUID, DriverBase]
 
-    def __init__(self, devices_factory):
-        self.session = Session()
-        self.devices = devices_factory(self.session)
+    def __init__(self, *args, root_device, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.root_device = root_device
         self.mapping = {}
 
         def subdevices(device):
@@ -34,17 +36,7 @@ class ExporterSession:
             else:
                 return {device.uuid: device}
 
-        for device in self.devices:
-            self.mapping |= subdevices(device)
-
-
-@dataclass(kw_only=True)
-class Exporter(
-    jumpstarter_pb2_grpc.ExporterServiceServicer,
-    router_pb2_grpc.RouterServiceServicer,
-    Metadata,
-):
-    session: ExporterSession
+        self.mapping |= subdevices(self.root_device)
 
     def add_to_server(self, server):
         jumpstarter_pb2_grpc.add_ExporterServiceServicer_to_server(self, server)
@@ -54,14 +46,12 @@ class Exporter(
         return jumpstarter_pb2.GetReportResponse(
             uuid=str(self.uuid),
             labels=self.labels,
-            device_report=itertools.chain(
-                *[device.reports() for device in self.session.devices]
-            ),
+            device_report=self.root_device.reports(),
         )
 
     async def DriverCall(self, request, context):
         args = [json_format.MessageToDict(arg) for arg in request.args]
-        result = await self.session.mapping[UUID(request.device_uuid)].call(
+        result = await self.mapping[UUID(request.device_uuid)].call(
             request.driver_method, args
         )
         return jumpstarter_pb2.DriverCallResponse(
@@ -73,9 +63,9 @@ class Exporter(
 
     async def StreamingDriverCall(self, request, context):
         args = [json_format.MessageToDict(arg) for arg in request.args]
-        async for result in self.session.mapping[
-            UUID(request.device_uuid)
-        ].streaming_call(request.driver_method, args):
+        async for result in self.mapping[UUID(request.device_uuid)].streaming_call(
+            request.driver_method, args
+        ):
             yield jumpstarter_pb2.StreamingDriverCallResponse(
                 call_uuid=str(uuid4()),
                 result=json_format.ParseDict(
@@ -91,7 +81,7 @@ class Exporter(
 
         match metadata["kind"]:
             case "device":
-                device = self.session.mapping[uuid]
+                device = self.mapping[uuid]
                 async with device.connect() as stream:
                     async for v in forward_server_stream(request_iterator, stream):
                         yield v
@@ -99,11 +89,11 @@ class Exporter(
                 client_stream, device_stream = create_memory_stream()
 
                 try:
-                    self.session.session.conns[uuid] = device_stream
+                    ContextStore.get().conns[uuid] = device_stream
                     async with client_stream:
                         async for v in forward_server_stream(
                             request_iterator, client_stream
                         ):
                             yield v
                 finally:
-                    del self.session.session.conns[uuid]
+                    del ContextStore.get().conns[uuid]

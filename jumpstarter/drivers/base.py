@@ -6,12 +6,16 @@ from dataclasses import dataclass, field
 from collections.abc import Generator
 from jumpstarter.v1 import jumpstarter_pb2
 from jumpstarter.common import Metadata
+from contextvars import ContextVar
 from .registry import _registry
 import inspect
 
 
+ContextStore = ContextVar("store")
+
+
 @dataclass(kw_only=True)
-class Session:
+class Store:
     fds: List[BinaryIO] = field(default_factory=list, init=False)
     conns: Dict[UUID, Any] = field(default_factory=dict, init=False)
 
@@ -19,8 +23,6 @@ class Session:
 # base class for all drivers
 @dataclass(kw_only=True)
 class DriverBase(ABC, Metadata):
-    session: Session
-
     def __init_subclass__(cls, interface=None, **kwargs):
         if interface:
             cls.interface = interface
