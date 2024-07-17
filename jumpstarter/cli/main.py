@@ -2,11 +2,11 @@
 import click
 import os
 import sys
+import importlib.metadata
 
-# from jumpstarter import __version__
 
-__version__ = '0.1.0'
-
+# Get the version from pyproject.toml
+__version__ = importlib.metadata.version('jumpstarter')
 
 def version_msg():
     """Return the Jumpstarter version."""
