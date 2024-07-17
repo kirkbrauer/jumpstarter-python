@@ -29,8 +29,8 @@ to directly or through a proxy server to interact with a specific device.
 
 #### Driver
 
-Jumpstarter drivers are exporter plugins that provide the ability to interact 
-with a specific device. Drivers provide an interface that can be interacted with
+Jumpstarter drivers are exporter plugins that provide the ability to interact with
+a specific device. Drivers provide an interface that can be interacted with
 either through Python (as a library) or the CLI.
 
 #### Client
@@ -48,16 +48,13 @@ of Jumpstarter as a library through Python.
 ### [`jumpstarter-controller`](https://github.com/jumpstarter-dev/jumpstarter-controller/)
 
 To provide compatibility with many existing Kubernetes-based tools (such as Helm)
-and CI/CD systems (such as Tekton and ArgoCD), Jumpstarter server components are
-implemented as Kubernetes services and resources.
+and CI systems (such as Tekton), Jumpstarter server components are implemented
+as Kubernetes services.
 
 Jumpstarter uses Kubernetes primitives and [Custom Resource Definitions (CRDs)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 to manage the state of resources such as clients, exporters, and leases.
 When a new client or exporter is registered, a resource is created in the
 cluster to keep track of its state similar to how nodes and pods are managed.
-
-These resources can also be managed with a GitOps/CD tools such as [ArgoCD](https://argoproj.github.io/cd/)
-to provide a stable and auditable deployment of your hardware testing systems.
 
 #### Controller
 
@@ -181,12 +178,9 @@ style jumpstarter fill:#999,stroke:#333,stroke-width:4px
 block-beta
   columns 1
 
-  block:tester
-    columns 1
-    user(("User"))
-    space
-    jumpstarter("Jumpstarter CLI / Library")
-  end
+  client(("Client"))
+  space
+  jumpstarter("jumpstarter")
   space
   block:service
     controller
@@ -205,9 +199,9 @@ block-beta
     end
   end
 
-  user --> jumpstarter
+  client --> jumpstarter
+  exporter -- "gRPC" --> service
   jumpstarter -- "gRPC" --> service
-  test -- "gRPC" --> service
 
 style hardware fill:#888,stroke:#333,stroke-width:4px
 ```
