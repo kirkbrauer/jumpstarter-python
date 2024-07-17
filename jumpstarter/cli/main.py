@@ -3,7 +3,9 @@ import click
 import os
 import sys
 
-from jumpstarter import __version__
+# from jumpstarter import __version__
+
+__version__ = '0.1.0'
 
 
 def version_msg():
