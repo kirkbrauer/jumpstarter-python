@@ -6,7 +6,7 @@
 
 ```bash
 $ jmp
-Usage: jumpstarter [OPTIONS] COMMAND [ARGS]...
+Usage: jmp [OPTIONS] COMMAND [ARGS]...
 
   The Jumpstarter CLI tool.
 
@@ -16,18 +16,19 @@ Options:
 Commands:
   client    Configure and interact with clients
   exporter  Configure and interact with exporters
-  start     Start a local exporter instance and run tests
-  run       Run tests with Jumpstarter
-  up        Start the Jumpstarter service in a local cluster
-  config    Configure Jumpstarter locally
+  run       Run tests using Jumpstarter
+  up        Start the Jumpstarter service locally
+  config    Modify Jumpstarter configuration files
   version   Print version information
+  help      Show this message and exit
 ```
 
 ### Version
 
 ```bash
 $ jmp version
-Jumpstarter CLI from /workspaces/jumpstarter-python/jumpstarter (Python 3.11.9 (main, Jul  2 2024, 21:27:27) [GCC 12.2.0])
+Jumpstarter CLI from /workspaces/jumpstarter-python/jumpstarter 
+Python 3.11.9 (main, Jul  2 2024, 21:27:27) [GCC 12.2.0]
 
 Client Version: v0.1.0
 Server Version: v0.1.0
