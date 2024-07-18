@@ -1,5 +1,152 @@
 # Jumpstarter Usage
 
+## Subcommands
+
+### Version
+
+```bash
+$ jmp version
+Jumpstarter CLI from /workspaces/jumpstarter-python/jumpstarter (Python 3.11.9 (main, Jul  2 2024, 21:27:27) [GCC 12.2.0])
+
+Client Version: v0.1.0
+Server Version: v0.1.0
+Protocol Version: v1alpha1
+```
+
+### Client
+
+```bash
+$ jmp client create my-client
+Enter the server: grpcs://jumpstarter.my-lab.com:1443
+Requesting a new token...
+Detected kubectl installation
+Creating token...
+
+Created my-client
+```
+
+Creates a new client `my-client` 
+
+```bash
+$ jmp client create my-client -o my-client.yaml
+Enter the server: grpcs://jumpstarter.my-lab.com:1443
+Requesting a new token...
+Detected kubectl installation
+Creating token...
+
+Created my-client.yaml
+```
+
+Creates a new client configuration YAML file.
+
+```bash
+$ jmp client ping
+Using client 'default'
+Ping grpcs://jumpstarter.my-lab.com:1443 (123.456.789.1)
+Pong in 12ms
+Pong in 14ms
+Pong in 13ms
+```
+
+Pings the configured server for a specified client (or default).
+
+```bash
+$ jmp client test my-client
+Using client 'my-cleint'
+Testing connection to grpcs://jumpstarter.my-lab.com:1443 (123.456.789.1)...
+Latency 12ms
+Connection Successful!
+```
+
+Tests the connection for the configured server for a specified client (or default).
+
+### Exporter
+
+```bash
+$ jmp exporter create my-exporter -o my-exporter.yaml
+Enter the server: grpcs://jumpstarter.my-lab.com:1443
+Requesting a new token...
+Detected kubectl installation
+Creating token...
+
+Created my-exporter.yaml
+```
+
+Creates a local exporter configuration YAML file.
+
+```bash
+$ jmp exporter start
+Exporter 'default' started
+```
+
+Starts the default exporter instance as a process in the current terminal.
+
+```bash
+$ jmp exporter start my-exporter
+Exporter 'default' started
+```
+
+Starts the specified exporter instance as a process in the current terminal.
+
+```bash
+$ jmp exporter start my-exporter --container
+Starting container 'my-exporter' with Podman...
+Container Started!
+```
+
+Starts the specified exporter instance as a container using Podman/Docker.
+
+```bash
+$ jmp exporter start my-exporter --service
+Starting service 'my-exporter.service' with systemd...
+Service Started!
+```
+
+Starts the specified exporter instance as a systemd service.
+
+### Config
+
+```bash
+$ jmp config set-exporter my-exporter.yaml
+Set default exporter to 'my-exporter'
+```
+
+Sets the default exporter config in the `~/.config/jumpstarter`.
+
+### Start
+
+```bash
+$ jmp start pytest ./my_test.py
+Starting exporter 'default' locally...
+...
+```
+
+Starts a local exporter instance and runs any test commands passed in as an argument.
+
+### Run
+
+```bash
+$ jmp run ./my_test.yaml
+Running tests in ./my_test.yaml...
+```
+
+Runs a Jumpstarter test defined in YAML.
+
+### Up
+
+```bash
+$ jmp up
+Detected kubectl installation
+Client Version: v1.26.1
+Kustomize Version: v4.5.7
+Server Version: v1.22.11
+Installing Jumpstarter CRDs...
+Starting Jumpstarter service...
+Jumpstarter started successfully!
+```
+
+Starts a local instance of Jumpstarter within the k8s cluster using the current `kubeconfig` and active context.
+
 ## Administrator Tasks
 
 ### Creating a client token and configuration

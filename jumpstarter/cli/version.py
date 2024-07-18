@@ -22,7 +22,7 @@ def version_msg():
     return f"Jumpstarter v{jumpstarter_version} from {location} (Python {python_version})"
 
 
-@click.command()
+@click.command(short_help='Print version information')
 def version():
     """Get the current Jumpstarter version."""
     click.echo(version_msg())
