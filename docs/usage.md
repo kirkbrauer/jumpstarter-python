@@ -15,12 +15,18 @@ Protocol Version: v1alpha1
 
 ### Client
 
+#### Creating a Client
+
 ```bash
 $ jmp client create my-client
-Enter the server: grpcs://jumpstarter.my-lab.com:1443
+Enter the server (localhost:1443): jumpstarter.my-lab.com:1443
+
+Detected kubectl installation /usr/local/bin/kubectl
+Using kubeconfig at /home/john/.kube/config
+Using current context 'docker'
+
 Requesting a new token...
-Detected kubectl installation
-Creating token...
+Created token: ***
 
 Created my-client
 ```
@@ -29,15 +35,30 @@ Creates a new client `my-client`
 
 ```bash
 $ jmp client create my-client -o my-client.yaml
-Enter the server: grpcs://jumpstarter.my-lab.com:1443
+Enter the server (localhost:1443): jumpstarter.my-lab.com:1443
+
+Detected kubectl installation /usr/local/bin/kubectl
+Using kubeconfig at /home/john/.kube/config
+Using current context 'docker'
+
 Requesting a new token...
-Detected kubectl installation
-Creating token...
+Created token: ***
 
 Created my-client.yaml
 ```
 
-Creates a new client configuration YAML file.
+Creates a new client and saves config to a YAML file `my-client.yaml`.
+
+```yaml
+apiVersion: jumpstarter.dev/v1alpha1
+kind: Client
+client:
+    name: my-client
+    endpoint: "grpcs://jumpstarter.my-lab.com:1443"
+    token: dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK
+```
+
+#### Testing Connection
 
 ```bash
 $ jmp client ping
@@ -52,7 +73,7 @@ Pings the configured server for a specified client (or default).
 
 ```bash
 $ jmp client test my-client
-Using client 'my-cleint'
+Using client 'my-client'
 Testing connection to grpcs://jumpstarter.my-lab.com:1443 (123.456.789.1)...
 Latency 12ms
 Connection Successful!
@@ -62,17 +83,34 @@ Tests the connection for the configured server for a specified client (or defaul
 
 ### Exporter
 
+#### Creating an Exporter
+
 ```bash
 $ jmp exporter create my-exporter -o my-exporter.yaml
-Enter the server: grpcs://jumpstarter.my-lab.com:1443
+Enter the server (localhost:1443): jumpstarter.my-lab.com:1443
+
+Detected kubectl installation /usr/local/bin/kubectl
+Using kubeconfig at /home/john/.kube/config
+Using current context 'docker'
+
 Requesting a new token...
-Detected kubectl installation
-Creating token...
+Created token: ***
 
 Created my-exporter.yaml
 ```
 
-Creates a local exporter configuration YAML file.
+Creates a local exporter and saves a YAML configuration file.
+
+```yaml
+apiVersion: jumpstarter.dev/v1alpha1
+kind: Exporter
+client:
+    name: my-exporter
+    endpoint: "grpcs://jumpstarter.my-lab.com:1443"
+    token: dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK
+```
+
+#### Start Exporter
 
 ```bash
 $ jmp exporter start
@@ -106,12 +144,32 @@ Starts the specified exporter instance as a systemd service.
 
 ### Config
 
+#### Set a Default Exporter
+
 ```bash
-$ jmp config set-exporter my-exporter.yaml
+$ jmp config set-exporter my-exporter
 Set default exporter to 'my-exporter'
 ```
 
-Sets the default exporter config in the `~/.config/jumpstarter`.
+Sets the exporter config in the `~/.config/jumpstarter`.
+
+#### Set a Default Exporter from File
+
+```bash
+$ jmp config set-exporter my-exporter -f ./my-exporter.yaml
+Set default exporter to 'my-exporter'
+```
+
+Sets the exporter config in the `~/.config/jumpstarter`.
+
+#### Set a Default Client
+
+```bash
+$ jmp config set-client my-client
+Set default client to 'my-client'
+```
+
+Sets the client config in the `~/.config/jumpstarter`.
 
 ### Start
 
@@ -125,6 +183,8 @@ Starts a local exporter instance and runs any test commands passed in as an argu
 
 ### Run
 
+#### YAML Tests
+
 ```bash
 $ jmp run ./my_test.yaml
 Running tests in ./my_test.yaml...
@@ -132,16 +192,34 @@ Running tests in ./my_test.yaml...
 
 Runs a Jumpstarter test defined in YAML.
 
+#### Python Tests
+
+```bash
+$ jmp run pytest ./my_test.py
+...
+```
+
+OR
+
+```bash
+$ pytest ./my_test.py
+````
+
 ### Up
 
 ```bash
 $ jmp up
-Detected kubectl installation
+Detected kubectl installation /usr/local/bin/kubectl
+Using kubeconfig at /home/john/.kube/config
+Using current context 'docker'
+
 Client Version: v1.26.1
 Kustomize Version: v4.5.7
 Server Version: v1.22.11
+
 Installing Jumpstarter CRDs...
 Starting Jumpstarter service...
+
 Jumpstarter started successfully!
 ```
 
