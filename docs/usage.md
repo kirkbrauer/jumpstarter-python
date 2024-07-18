@@ -2,6 +2,27 @@
 
 ## Subcommands
 
+### Help
+
+```bash
+$ jmp
+Usage: jumpstarter [OPTIONS] COMMAND [ARGS]...
+
+  The Jumpstarter CLI tool.
+
+Options:
+  -h, --help  Show this message and exit.
+
+Commands:
+  client    Configure and interact with clients
+  exporter  Configure and interact with exporters
+  start     Start a local exporter instance and run tests
+  run       Run tests with Jumpstarter
+  up        Start the Jumpstarter service in a local cluster
+  config    Configure Jumpstarter locally
+  version   Print version information
+```
+
 ### Version
 
 ```bash

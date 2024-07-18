@@ -24,6 +24,7 @@ subdirectory = "python"
 
 [tool.poetry.scripts]
 jumpstarter = "jumpstarter.cli:main"
+jmp = "jumpstarter.cli:main"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
