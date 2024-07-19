@@ -4,6 +4,7 @@ import click
 from .start import start
 from .client import client
 from .exporter import exporter
+from .doctor import doctor
 from .version import version
 
 
@@ -25,6 +26,7 @@ def jmp():
 jmp.add_command(start)
 jmp.add_command(client)
 jmp.add_command(exporter)
+jmp.add_command(doctor)
 jmp.add_command(version)
 jmp.add_command(help)
 
