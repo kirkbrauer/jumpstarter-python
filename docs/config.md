@@ -1,18 +1,28 @@
 # Jumpstarter Configuration
 
-Jumpstarter can be configured as either a client, an exporter, or both depending on your use case and deployment strategy.
+Jumpstarter can be configured as either a client, an exporter, or both depending
+on your use case and deployment strategy.
 
-By default, a local client and exporter session are automatically initalized when running test scripts through `jmp start` or the `jmp shell` commands. This allows for easy testing of new drivers, client libraries, or verifying that tests work on your local bench.
+By default, a local client and exporter session are automatically initalized when
+running test scripts through `jmp start` or the `jmp shell` commands. This allows
+for easy testing of new drivers, client libraries, or verifying that tests work
+on your local bench.
 
-When interacting with remote exporters in a CLI or CI environment, multiple clients can be configured on the same system and used to interact with different devices and different exporter instances.
+When interacting with remote exporters in a CLI or CI environment, multiple clients
+can be configured on the same system and used to interact with different devices
+and different exporter instances.
 
-Similarly, multiple exporters can be configured on a single host system to interact with many different devices. However, each exporter instance is independent, making it possible to stop, restart, and add new exporters while others are executing tests.
+Similarly, multiple exporters can be configured on a single host system to interact
+with many different devices. However, each exporter instance is independent, making
+it possible to stop, restart, and add new exporters while others are executing tests.
 
 ## User Configuration
 
-Jumpstarter stores user-specific configs in the `~/.config/jumpstarter` directory within the user's home folder.
+Jumpstarter stores user-specific configs in the `~/.config/jumpstarter` directory
+within the user's home folder.
 
-The user config file defines the current client config and any user-specific configurations for `jmp` CLI tool.
+The user config file defines the current client config and any user-specific
+configurations for `jmp` CLI tool.
 
 ```yaml
 # ~/.config/jumpstarter/config.yaml
@@ -25,9 +35,12 @@ config:
 
 ## System Configuration
 
-Jumpstarter stores system configs in the `/etc/jumpstarter` directory. This configuration directory is primarily used by the exporters as they often run as daemon services on the host system.
+Jumpstarter stores system configs in the `/etc/jumpstarter` directory.
+This configuration directory is primarily used by the exporters as they often
+run as daemon services on the host system.
 
-The system config file defines the current exporter config and any system-level configurations for the exporters to use.
+The system config file defines the current exporter config and any system-level
+configurations for the exporters to use.
 
 ```yaml
 # /etc/jumpstarter/config.yaml
@@ -40,7 +53,9 @@ config:
 
 ## Clients
 
-Client configurations are stored in the Jumpstarter user configuration directory `~/.config/jumpstarter`. Each client config is a YAML file that contains the client name, access token, and any configuration parameters.
+Client configurations are stored in the Jumpstarter user configuration directory
+`~/.config/jumpstarter`. Each client config is a YAML file that contains the client
+name, access token, and any configuration parameters.
 
 ### Client Config
 
@@ -67,13 +82,18 @@ client:
 
 ### Multiple Clients
 
-Multiple client configs can be added to the `~/.config/jumpstarter/clients` directory manually or by using the Jumpstarter CLI.
+Multiple client configs can be added to the `~/.config/jumpstarter/clients` directory
+manually or by using the Jumpstarter CLI.
 
-Similar to kubectl, Jumpstarter allows you to switch between different client configurations using the CLI tool. A `default` client is automatically configured when installing the Jumpstarter Helm chart with `jmp install`. 
+Similar to kubectl, Jumpstarter allows you to switch between different client
+configurations using the CLI tool. A `default` client is automatically configured
+when installing the Jumpstarter Helm chart with `jmp install`. 
 
 ### CLI Commands
 
-To create a new client, the `jmp client create <name>` command can be used. When `kubectl` is installed and the current context contains a Jumpstarter controller instance, client tokens will be automatically generated using the controller endpoint.
+To create a new client, the `jmp client create <name>` command can be used. When
+`kubectl` is installed and the current context contains a Jumpstarter controller
+instance, client tokens will be automatically generated using the controller endpoint.
 
 ```bash
 $ jmp client create myclient
@@ -108,21 +128,28 @@ Deleted client config '/home/jdoe/.config/jumpstarter/clients/myclient.yaml'
 
 ### Environment Variables
 
-The client configuration may also be provided by environment variables which may be useful in CI or when writing a script that uses Jumpstarter.
+The client configuration may also be provided by environment variables which may
+be useful in CI or when writing a script that uses Jumpstarter.
 
 - `JUMPSTARTER_CLIENT_CONFIG` - A path to a client configuration YAML file to use.
 - `JUMPSTARTER_CLIENT` - The name of a registered client config to use.
-- `JUMPSTARTER_ENDPOINT` - The gRPC endpoint of the Jumpstarter controller server (overrides the config value).
-- `JUMPSTARTER_TOKEN` - A client auth token generated by the controller (overrides the config value).
-- `JUMPSTARTER_DRIVERS` - A comma-separated list of allowed driver namespaces to automatically load (overrides the config value).
+- `JUMPSTARTER_ENDPOINT` - The gRPC endpoint of the Jumpstarter controller server
+(overrides the config value).
+- `JUMPSTARTER_TOKEN` - A client auth token generated by the controller
+(overrides the config value).
+- `JUMPSTARTER_DRIVERS` - A comma-separated list of allowed driver namespaces
+to automatically load (overrides the config value).
 
 ## Exporters
 
-Exporter configurations are by default stored globally in the Jumpstarter config directory `/etc/jumpstarter`. Each exporter config is a YAML file and optionally a Python script to initalize the exporter and its associated drivers.
+Exporter configurations are by default stored globally in the Jumpstarter config
+directory `/etc/jumpstarter`. Each exporter config is a YAML file and optionally
+a Python script to initalize the exporter and its associated drivers.
 
 ### Exporter Config
 
-Exporters can be configured using a pure-YAML format, which allows for the configuration of built-in drivers and any additional driver packages registered by the user.
+Exporters can be configured using a pure-YAML format, which allows for the configuration
+of built-in drivers and any additional driver packages registered by the user.
 
 ```yaml
 # /etc/jumpstarter/myexporter.yaml
@@ -162,12 +189,14 @@ exporter:
 - `token` - An exporter auth token generated by the controller.
 - `drivers` - Exporter driver configuration.
   - `import` - Specific driver namespaces to import (if not using a setup script).
-  - `allow` - A list of allowed driver namespaces to automatically load (required with setup script).
+  - `allow` - A list of allowed driver namespaces to automatically load
+  (required with setup script).
   - `root` - The root driver config (not used if using setup script).
   - `script` - The path to a setup script to run to configure the drivers.
   - `unsafe: true` - Should all drivers be allowed to load?
 
-For more complex configuration or auto-discovery, a custom Python setup script may be necassary:
+For more complex configuration or auto-discovery, a custom Python setup script
+may be necassary:
 
 ```yaml
 # /etc/jumpstarter/exporters/myexporter/exporter.yaml
@@ -212,11 +241,15 @@ def setup():
     )
 ```
 
-Exporters can be discovered within the `/etc/jumpstarter/exporters` directory either as a single YAML file or as a directory containing an `exporter.yaml` file.
+Exporters can be discovered within the `/etc/jumpstarter/exporters` directory either
+as a single YAML file or as a directory containing an `exporter.yaml` file.
 
 ### CLI Commands
 
-To create a new exporter, the `jmp exporter create <name>` command can be used. When `kubectl` is installed and the current context contains a Jumpstarter controller instance, exporter tokens will be automatically generated using the controller endpoint. By default, a basic YAML config will be generated.
+To create a new exporter, the `jmp exporter create <name>` command can be used.
+When `kubectl` is installed and the current context contains a Jumpstarter controller
+instance, exporter tokens will be automatically generated using the controller endpoint.
+By default, a basic YAML config will be generated.
 
 ```bash
 $ jmp exporter create myexporter
@@ -235,7 +268,8 @@ Created exporter config '/etc/jumpstarter/exporters/myexporter/exporter.yaml'
 Created exporter setup script '/etc/jumpstarter/exporters/myexporter/setup.py'
 ```
 
-To switch between different exporter configs, use the `jmp exporter use <name>` command:
+To switch between different exporter configs, use the `jmp exporter use <name>`
+command:
 
 ```bash
 $ jmp exporter use another
@@ -274,10 +308,15 @@ Deleted exporter config '/etc/jumpstarter/exporters/myexporter.yaml'
 
 ### Environment Variables
 
-The exporter configuration may also be provided by environment variables which may be useful in CI or when writing a script that uses Jumpstarter.
+The exporter configuration may also be provided by environment variables which
+may be useful in CI or when writing a script that uses Jumpstarter.
 
-- `JUMPSTARTER_EXPORTER_CONFIG` - A path to a exporter configuration YAML file to use.
+- `JUMPSTARTER_EXPORTER_CONFIG` - A path to a exporter configuration YAML file
+to use.
 - `JUMPSTARTER_EXPORTER` - The name of a registered exporter config to use.
-- `JUMPSTARTER_ENDPOINT` - The gRPC endpoint of the Jumpstarter controller server (overrides the config value).
-- `JUMPSTARTER_TOKEN` - An exporter auth token generated by the controller (overrides the config value).
-- `JUMPSTARTER_DRIVERS` - A comma-separated list of allowed driver namespaces to automatically load (overrides the config value).
+- `JUMPSTARTER_ENDPOINT` - The gRPC endpoint of the Jumpstarter controller server
+(overrides the config value).
+- `JUMPSTARTER_TOKEN` - An exporter auth token generated by the controller
+(overrides the config value).
+- `JUMPSTARTER_DRIVERS` - A comma-separated list of allowed driver namespaces
+to automatically load (overrides the config value).
