@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 
 from anyio import create_task_group
 from anyio.streams.file import FileReadStream
+from anyio.streams.stapled import StapledObjectStream
 from google.protobuf import json_format, struct_pb2
 from grpc import StatusCode
 from grpc.aio import Channel
@@ -80,13 +81,17 @@ class Driver(
             case "resource":
                 remote, resource = create_memory_stream()
 
-                self.resources[UUID(metadata["resource_uuid"])] = resource
+                resource_uuid = uuid4()
+
+                self.resources[resource_uuid] = resource
+
+                await resource.send(str(resource_uuid).encode("utf-8"))
 
                 async with remote:
                     async for v in forward_server_stream(request_iterator, remote):
                         yield v
 
-                del self.resources[UUID(metadata["resource_uuid"])]
+                del self.resources[resource_uuid]
 
     async def GetReport(self, request, context):
         return jumpstarter_pb2.GetReportResponse(
@@ -149,7 +154,7 @@ class DriverClient(
 
     channel: Channel
 
-    def __post_init__(self):
+    def __post_init__(self, *args):
         jumpstarter_pb2_grpc.ExporterServiceStub.__init__(self, self.channel)
         router_pb2_grpc.RouterServiceStub.__init__(self, self.channel)
 
@@ -214,20 +219,22 @@ class DriverClient(
         self,
         stream,
     ):
-        uuid = uuid4()
+        tx, rx = create_memory_stream()
+
+        combined = StapledObjectStream(tx, stream)
 
         async def handle(stream):
             async with stream:
                 await forward_client_stream(
                     self,
                     stream,
-                    {"kind": "resource", "uuid": str(self.uuid), "resource_uuid": str(uuid)}.items(),
+                    {"kind": "resource", "uuid": str(self.uuid)}.items(),
                 )
 
         async with create_task_group() as tg:
-            tg.start_soon(handle, stream)
+            tg.start_soon(handle, combined)
             try:
-                yield str(uuid)
+                yield (await rx.receive()).decode()
             finally:
                 tg.cancel_scope.cancel()
 

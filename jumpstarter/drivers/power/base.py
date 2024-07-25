@@ -2,6 +2,9 @@ from abc import ABCMeta, abstractmethod
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 
+import click
+from anyio import from_thread
+
 from jumpstarter.drivers import Driver, DriverClient, export
 
 
@@ -11,7 +14,7 @@ class PowerReading:
     current: float
     apparent_power: float = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self, *args):
         self.apparent_power = self.voltage * self.current
 
 
@@ -44,6 +47,24 @@ class PowerClient(PowerInterface, DriverClient):
     async def read(self) -> AsyncGenerator[PowerReading, None]:
         async for v in self.streamingcall("read"):
             yield PowerReading(voltage=v["voltage"], current=v["current"])
+
+    def cli(self):
+        @click.group
+        def base():
+            """Generic power"""
+            pass
+
+        @base.command()
+        def on():
+            """Power on"""
+            click.echo(from_thread.run(self.on))
+
+        @base.command()
+        def off():
+            """Power off"""
+            click.echo(from_thread.run(self.off))
+
+        return base
 
 
 class MockPower(PowerInterface, Driver):
