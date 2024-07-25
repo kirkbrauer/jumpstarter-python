@@ -8,6 +8,36 @@ When interacting with remote exporters in a CLI or CI environment, multiple clie
 
 Similarly, multiple exporters can be configured on a single host system to interact with many different devices. However, each exporter instance is independent, making it possible to stop, restart, and add new exporters while others are executing tests.
 
+## User Configuration
+
+Jumpstarter stores user-specific configs in the `~/.config/jumpstarter` directory within the user's home folder.
+
+The user config file defines the current client config and any user-specific configurations for `jmp` CLI tool.
+
+```yaml
+# ~/.config/jumpstarter/config.yaml
+
+apiVersion: jumpstarter.dev/v1alpha1
+kind: UserConfig
+config:
+  current-client: ./clients/myclient.yaml
+```
+
+## System Configuration
+
+Jumpstarter stores system configs in the `/etc/jumpstarter` directory. This configuration directory is primarily used by the exporters as they often run as daemon services on the host system.
+
+The system config file defines the current exporter config and any system-level configurations for the exporters to use.
+
+```yaml
+# /etc/jumpstarter/config.yaml
+
+apiVersion: jumpstarter.dev/v1alpha1
+kind: SystemConfig
+config:
+  current-exporter: ./exporters/myexporter/exporter.yaml
+```
+
 ## Clients
 
 Client configurations are stored in the Jumpstarter user configuration directory `~/.config/jumpstarter`. Each client config is a YAML file that contains the client name, access token, and any configuration parameters.
@@ -205,6 +235,13 @@ Created exporter config '/etc/jumpstarter/exporters/myexporter/exporter.yaml'
 Created exporter setup script '/etc/jumpstarter/exporters/myexporter/setup.py'
 ```
 
+To switch between different exporter configs, use the `jmp exporter use <name>` command:
+
+```bash
+$ jmp exporter use another
+Using exporter config '/etc/jumpstarter/exporters/another/exporter.yaml'
+```
+
 To use a specific config when starting the exporter:
 
 ```bash
@@ -222,10 +259,10 @@ All exporter configurations can be listed with `jmp exporter list`:
 
 ```bash
 $ jmp exporter list
-NAME         ENDPOINT                               LOCATION                                           SCRIPT
-default      grpcs://jumpstarter1.my-lab.com:1443   /etc/jumpstarter/exporters/default.yaml            N/A
-myexporter   grpcs://jumpstarter2.my-lab.com:1443   /etc/jumpstarter/exporters/myexporter.yaml         N/A
-another      grpcs://jumpstarter3.my-lab.com:1443   /etc/jumpstarter/exporters/another/exporter.yaml   /etc/jumpstarter/exporters/another/setup.py
+CURRENT   NAME         ENDPOINT                               LOCATION                                           SCRIPT
+*         default      grpcs://jumpstarter1.my-lab.com:1443   /etc/jumpstarter/exporters/default.yaml            N/A
+          myexporter   grpcs://jumpstarter2.my-lab.com:1443   /etc/jumpstarter/exporters/myexporter.yaml         N/A
+          another      grpcs://jumpstarter3.my-lab.com:1443   /etc/jumpstarter/exporters/another/exporter.yaml   /etc/jumpstarter/exporters/another/setup.py
 ```
 
 Clients can also be removed using `jmp client delete <name>`:
