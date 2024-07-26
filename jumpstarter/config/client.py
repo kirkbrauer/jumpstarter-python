@@ -18,11 +18,12 @@ class ClientConfigDrivers:
     unsafe: bool
     """Allow any required driver client packages to load without restriction."""
 
-    def from_dict(self, values: dict) -> Self:
+    def from_dict(values: dict) -> Self:
+        """Load the client config driver options from a YAML dict."""
         allow = values.get("allow")
         unsafe = values.get("unsafe", False)
 
-        if isinstance(values, list):
+        if isinstance(allow, list) is False:
             raise ValueError("Key 'client.drivers.allow' should be a list of strings.")
 
         return ClientConfigDrivers(allow, unsafe)
@@ -35,7 +36,7 @@ class ClientConfig:
     # The directory path for client configs
     CLIENT_CONFIGS_PATH = os.path.expanduser("~/.config/jumpstarter/clients")
 
-    CONFIG_KIND = "ClientConfig"
+    CONFIG_KIND = "Client"
 
     name: str
     """The name of the client config."""
@@ -54,24 +55,35 @@ class ClientConfig:
 
         return f"{ClientConfig.CLIENT_CONFIGS_PATH}/{name}.yaml"
 
+    def try_from_env() -> Optional[Self]:
+        """Attempt to load the config from the environment variables, returns `None` if all are not set."""
+
+        if (
+            os.environ.get(JMP_TOKEN) is not None
+            and os.environ.get(JMP_ENDPOINT) is not None
+            and os.environ.get(JMP_DRIVERS_ALLOW) is not None
+        ):
+            return ClientConfig.from_env()
+        else:
+            return None
+
     def from_env() -> Self:
         """Constructs a client config from environment variables."""
 
         token = os.environ.get(JMP_TOKEN)
         endpoint = os.environ.get(JMP_ENDPOINT)
         drivers_val = os.environ.get(JMP_DRIVERS_ALLOW)
+        allow_unsafe = drivers_val == "UNSAFE"
 
         if token is None:
             raise ValueError(f"Environment variable '{JMP_TOKEN}' is not set.")
         if endpoint is None:
             raise ValueError(f"Environment variable '{JMP_ENDPOINT}' is not set.")
-        if drivers_val is None:
-            raise ValueError(f"Environment variable '{JMP_DRIVERS_ALLOW}' is not set.")
 
         # Split allowed driver packages as a comma-separated list
-        drivers = ClientConfigDrivers(drivers_val.split(","), False)
+        drivers = ClientConfigDrivers(drivers_val.split(",") if allow_unsafe is False else [], allow_unsafe)
 
-        return ClientConfig(token, endpoint, drivers)
+        return ClientConfig("default", token, endpoint, drivers)
 
     def from_file(path: str) -> Self:
         """Constructs a client config from a YAML file."""
@@ -102,14 +114,14 @@ class ClientConfig:
             if drivers_val is None:
                 raise ValueError("Config does not contain a 'client.drivers' key.")
 
-            drivers = ClientConfigDrivers.from_dict((drivers_val))
+            drivers = ClientConfigDrivers.from_dict(drivers_val)
 
             return ClientConfig(name, token, endpoint, drivers)
 
     def load(name: str) -> Self:
         """Load a client config by name."""
         path = ClientConfig._get_path(name)
-        if os.path.exists() is False:
+        if os.path.exists(path) is False:
             raise FileNotFoundError(f"Client config '{path}' does not exist.")
 
         return ClientConfig.from_file(path)
@@ -120,8 +132,8 @@ class ClientConfig:
             "apiVersion": CONFIG_API_VERSION,
             "kind": ClientConfig.CONFIG_KIND,
             "client": {
-                "token": config.token,
                 "endpoint": config.endpoint,
+                "token": config.token,
                 "drivers": {},
             },
         }
@@ -133,7 +145,7 @@ class ClientConfig:
             value["client"]["drivers"]["allow"] = config.drivers.allow
 
         with open(path or ClientConfig._get_path(config.name), "w") as f:
-            yaml.safe_dump(value, f)
+            yaml.safe_dump(value, f, sort_keys=False)
 
     def exists(name: str) -> bool:
         """Check if a client config exists by name."""
@@ -152,4 +164,4 @@ class ClientConfig:
             path = f"{ClientConfig.CLIENT_CONFIGS_PATH}/{file}"
             return ClientConfig.from_file(path)
 
-        return map(make_config, files)
+        return list(map(make_config, files))

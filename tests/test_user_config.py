@@ -78,7 +78,7 @@ config:
             os.unlink(f.name)
 
 
-def test_user_config_load_invalid_api_version():
+def test_user_config_load_invalid_api_version_raises():
     USER_CONFIG = """apiVersion: abc
 kind: UserConfig
 config:

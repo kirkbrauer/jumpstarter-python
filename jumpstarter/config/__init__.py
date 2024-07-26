@@ -4,12 +4,13 @@ from .env import JMP_CLIENT_CONFIG, JMP_DRIVERS_ALLOW, JMP_ENDPOINT, JMP_TOKEN
 from .user import UserConfig
 
 __all__ = [
+    "CONFIG_API_VERSION",
     "JMP_CLIENT_CONFIG",
     "JMP_ENDPOINT",
     "JMP_TOKEN",
     "JMP_DRIVERS_ALLOW",
-    "CONFIG_API_VERSION",
-    "UserConfig",
+    "JMP_DRIVERS_ALLOW_UNSAFE",
+    "UserConfig",    
     "ClientConfig",
     "ClientConfigDrivers",
 ]
