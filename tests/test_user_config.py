@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from jumpstarter.config import CONFIG_PATH, ClientConfig, ClientConfigDrivers, UserConfig
+from jumpstarter.config import ClientConfig, ClientConfigDrivers, UserConfig
 
 
 def test_user_config_exists():

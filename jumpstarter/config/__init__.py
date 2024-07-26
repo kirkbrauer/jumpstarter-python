@@ -11,7 +11,7 @@ __all__ = [
     "JMP_TOKEN",
     "JMP_DRIVERS_ALLOW",
     "JMP_DRIVERS_ALLOW_UNSAFE",
-    "UserConfig",    
+    "UserConfig",
     "ClientConfig",
     "ClientConfigDrivers",
 ]
