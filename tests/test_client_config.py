@@ -18,57 +18,87 @@ def setup_function():
         if key in os.environ:
             del os.environ[key]
 
+
+def test_client_ensure_exists_makes_dir():
+    with tempfile.TemporaryDirectory() as d:
+        ClientConfig.CLIENT_CONFIGS_PATH = f"{d}/clients"
+        ClientConfig.ensure_exists()
+        assert os.path.exists(ClientConfig.CLIENT_CONFIGS_PATH)
+
+
 def test_client_config_try_from_env():
-    os.environ[JMP_TOKEN] = "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    os.environ[JMP_TOKEN] = (
+        "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    )
     os.environ[JMP_ENDPOINT] = "grpcs://jumpstarter.my-lab.com:1443"
     os.environ[JMP_DRIVERS_ALLOW] = "jumpstarter.drivers.*,vendorpackage.*"
-    
+
     config = ClientConfig.try_from_env()
     assert config.name == "default"
-    assert config.token == "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    assert (
+        config.token
+        == "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    )
     assert config.endpoint == "grpcs://jumpstarter.my-lab.com:1443"
     assert config.drivers.allow == ["jumpstarter.drivers.*", "vendorpackage.*"]
     assert config.drivers.unsafe is False
+
 
 def test_client_config_try_from_env_not_set():
     config = ClientConfig.try_from_env()
     assert config is None
 
+
 def test_client_config_from_env():
-    os.environ[JMP_TOKEN] = "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    os.environ[JMP_TOKEN] = (
+        "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    )
     os.environ[JMP_ENDPOINT] = "grpcs://jumpstarter.my-lab.com:1443"
     os.environ[JMP_DRIVERS_ALLOW] = "jumpstarter.drivers.*,vendorpackage.*"
-    
+
     config = ClientConfig.from_env()
     assert config.name == "default"
-    assert config.token == "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    assert (
+        config.token
+        == "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    )
     assert config.endpoint == "grpcs://jumpstarter.my-lab.com:1443"
     assert config.drivers.allow == ["jumpstarter.drivers.*", "vendorpackage.*"]
     assert config.drivers.unsafe is False
 
+
 def test_client_config_from_env_allow_unsafe():
-    os.environ[JMP_TOKEN] = "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    os.environ[JMP_TOKEN] = (
+        "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    )
     os.environ[JMP_ENDPOINT] = "grpcs://jumpstarter.my-lab.com:1443"
     os.environ[JMP_DRIVERS_ALLOW] = "UNSAFE"
-    
+
     config = ClientConfig.from_env()
     assert config.name == "default"
-    assert config.token == "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    assert (
+        config.token
+        == "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    )
     assert config.endpoint == "grpcs://jumpstarter.my-lab.com:1443"
     assert config.drivers.allow == []
     assert config.drivers.unsafe is True
 
+
 def test_client_config_from_env_no_token_raises():
     os.environ[JMP_ENDPOINT] = "grpcs://jumpstarter.my-lab.com:1443"
     os.environ[JMP_DRIVERS_ALLOW] = "jumpstarter.drivers.*,vendorpackage.*"
-     
+
     with pytest.raises(ValueError):
         _ = ClientConfig.from_env()
 
+
 def test_client_config_from_env_no_endpoint_raises():
-    os.environ[JMP_TOKEN] = "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    os.environ[JMP_TOKEN] = (
+        "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK"
+    )
     os.environ[JMP_DRIVERS_ALLOW] = "jumpstarter.drivers.*,vendorpackage.*"
-     
+
     with pytest.raises(ValueError):
         _ = ClientConfig.from_env()
 
@@ -252,8 +282,8 @@ client:
 """
     config = ClientConfig(
         "testclient",
-        "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK",
         "grpcs://jumpstarter.my-lab.com:1443",
+        "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK",
         ClientConfigDrivers(["jumpstarter.drivers.*", "vendorpackage.*"], False),
     )
     with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
@@ -279,8 +309,8 @@ client:
 """
     config = ClientConfig(
         "testclient",
-        "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK",
         "grpcs://jumpstarter.my-lab.com:1443",
+        "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK",
         ClientConfigDrivers(["jumpstarter.drivers.*", "vendorpackage.*"], False),
     )
     with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
@@ -302,8 +332,8 @@ client:
 """
     config = ClientConfig(
         "testclient",
-        "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK",
         "grpcs://jumpstarter.my-lab.com:1443",
+        "dGhpc2lzYXRva2VuLTEyMzQxMjM0MTIzNDEyMzQtc2Rxd3Jxd2VycXdlcnF3ZXJxd2VyLTEyMzQxMjM0MTIzNDEyMzQxMjM0LXF3ZXJxd2VycXdlcnF3ZXJxd2VycXdlcnF3ZXIK",
         ClientConfigDrivers([], True),
     )
     with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
@@ -351,7 +381,24 @@ def test_client_config_list_none():
         assert len(configs) == 0
 
 
-def test_client_config_list_not_found_raises():
+def test_client_config_list_not_found_returns_empty():
     ClientConfig.CLIENT_CONFIGS_PATH = "/asdf/2134/cv/clients"
-    with pytest.raises(FileNotFoundError):
-        _ = ClientConfig.list()
+    configs = ClientConfig.list()
+    assert len(configs) == 0
+
+
+def test_client_config_delete():
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
+        with patch.object(ClientConfig, "_get_path", return_value=f.name) as _get_path_mock:
+            f.write("")
+            f.close()
+            ClientConfig.delete("testclient")
+            _get_path_mock.assert_called_once_with("testclient")
+            assert os.path.exists(f.name) is False
+
+
+def test_client_config_delete_does_not_exist_raises():
+    with patch.object(ClientConfig, "_get_path", return_value="/asdf/2134/cv/clients/xyz.yaml") as _get_path_mock:
+        with pytest.raises(FileNotFoundError):
+            ClientConfig.delete("xyz")
+        _get_path_mock.assert_called_once_with("xyz")

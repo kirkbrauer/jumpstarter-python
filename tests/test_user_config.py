@@ -4,11 +4,10 @@ from unittest.mock import patch
 
 import pytest
 
-from jumpstarter.config import ClientConfig, ClientConfigDrivers, UserConfig
+from jumpstarter.config import CONFIG_PATH, ClientConfig, ClientConfigDrivers, UserConfig
 
 
 def test_user_config_exists():
-    assert UserConfig.exists() is False
     with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
         f.write("")
         f.close()
@@ -121,6 +120,32 @@ kind: UserConfig
         os.unlink(f.name)
 
 
+def test_user_config_load_or_create_config_exists():
+    with patch.object(UserConfig, "exists", return_value=True) as mock_exists:
+        with patch.object(UserConfig, "load", return_value=UserConfig(None)) as mock_load:
+            _ = UserConfig.load_or_create()
+            mock_exists.assert_called_once()
+            mock_load.assert_called_once()
+
+
+def test_user_config_load_or_create_dir_exists():
+    with patch.object(UserConfig, "exists", return_value=False) as mock_exists:
+        with patch.object(os.path, "exists", return_value=True):
+            with patch.object(UserConfig, "save") as mock_save:
+                _ = UserConfig.load_or_create()
+                mock_exists.assert_called_once()
+                mock_save.assert_called_once_with(UserConfig(None))
+
+
+def test_user_config_load_or_create_dir_does_not_exist():
+    with tempfile.TemporaryDirectory() as d:
+        UserConfig.BASE_CONFIG_PATH = f"{d}/jumpstarter"
+        UserConfig.USER_CONFIG_PATH = f"{d}/jumpstarter/config.yaml"
+        with patch.object(UserConfig, "save") as mock_save:
+            _ = UserConfig.load_or_create()
+            mock_save.assert_called_once_with(UserConfig(None))
+
+
 def test_user_config_save():
     USER_CONFIG = """apiVersion: jumpstarter.dev/v1alpha1
 kind: UserConfig
@@ -163,8 +188,6 @@ config:
         ClientConfig, "load", return_value=ClientConfig("testclient", "abc", "123", ClientConfigDrivers([], False))
     ) as mock_load:
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
-            f.write(USER_CONFIG)
-            f.close()
             UserConfig.USER_CONFIG_PATH = f.name
             config = UserConfig(ClientConfig("another", "abc", "123", ClientConfigDrivers([], False)))
             config.use_client("testclient")
@@ -174,3 +197,20 @@ config:
                 mock_load.assert_called_once_with("testclient")
             assert config.current_client.name == "testclient"
             os.unlink(f.name)
+
+
+def test_user_config_use_client_none():
+    USER_CONFIG = """apiVersion: jumpstarter.dev/v1alpha1
+kind: UserConfig
+config:
+  current-client: ''
+"""
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
+        UserConfig.USER_CONFIG_PATH = f.name
+        config = UserConfig(ClientConfig("another", "abc", "123", ClientConfigDrivers([], False)))
+        config.use_client(None)
+        with open(f.name) as loaded:
+            value = loaded.read()
+            assert value == USER_CONFIG
+        assert config.current_client is None
+        os.unlink(f.name)

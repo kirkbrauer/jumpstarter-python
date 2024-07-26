@@ -41,11 +41,11 @@ class ClientConfig:
     name: str
     """The name of the client config."""
 
-    token: str
-    """A valid Jumpstarter access token."""
-
     endpoint: str
     """A Jumpstarter service gRPC endpoint."""
+
+    token: str
+    """A valid Jumpstarter access token."""
 
     drivers: ClientConfigDrivers
     """A client drivers configuration."""
@@ -57,6 +57,11 @@ class ClientConfig:
         """Get the regular path of a client config given a name."""
 
         return f"{ClientConfig.CLIENT_CONFIGS_PATH}/{name}.yaml"
+
+    def ensure_exists():
+        """Check if the clients config dir exists, otherwise create it."""
+        if os.path.exists(ClientConfig.CLIENT_CONFIGS_PATH) is False:
+            os.makedirs(ClientConfig.CLIENT_CONFIGS_PATH)
 
     def try_from_env() -> Optional[Self]:
         """Attempt to load the config from the environment variables, returns `None` if all are not set."""
@@ -86,7 +91,7 @@ class ClientConfig:
         # Split allowed driver packages as a comma-separated list
         drivers = ClientConfigDrivers(drivers_val.split(",") if allow_unsafe is False else [], allow_unsafe)
 
-        return ClientConfig("default", token, endpoint, drivers, None)
+        return ClientConfig("default", endpoint, token, drivers, None)
 
     def from_file(path: str) -> Self:
         """Constructs a client config from a YAML file."""
@@ -119,7 +124,7 @@ class ClientConfig:
 
             drivers = ClientConfigDrivers.from_dict(drivers_val)
 
-            config = ClientConfig(name, token, endpoint, drivers, path)
+            config = ClientConfig(name, endpoint, token, drivers, path)
             return config
 
     def load(name: str) -> Self:
@@ -148,6 +153,10 @@ class ClientConfig:
         else:
             value["client"]["drivers"]["allow"] = config.drivers.allow
 
+        # Ensure the clients dir exists
+        if path is None:
+            ClientConfig.ensure_exists()
+
         with open(path or ClientConfig._get_path(config.name), "w") as f:
             yaml.safe_dump(value, f, sort_keys=False)
 
@@ -158,7 +167,8 @@ class ClientConfig:
     def list() -> list[Self]:
         """List the available client configs."""
         if os.path.exists(ClientConfig.CLIENT_CONFIGS_PATH) is False:
-            raise FileNotFoundError(f"Client config directory '{ClientConfig.CLIENT_CONFIGS_PATH}' does not exist.")
+            # Return an empty list if the dir does nto exist
+            return []
 
         results = os.listdir(ClientConfig.CLIENT_CONFIGS_PATH)
         # Only accept YAML files in the list
@@ -169,3 +179,10 @@ class ClientConfig:
             return ClientConfig.from_file(path)
 
         return list(map(make_config, files))
+
+    def delete(name: str):
+        """Delete a client config by name."""
+        path = ClientConfig._get_path(name)
+        if os.path.exists(path) is False:
+            raise FileNotFoundError(f"Client config '{path}' does not exist.")
+        os.unlink(path)

@@ -13,7 +13,8 @@ class UserConfig:
     """The user configuration for the Jumpstarter CLI."""
 
     # The user config path e.g. ~/.config/jumpstarter
-    USER_CONFIG_PATH = os.path.expanduser(f"{CONFIG_PATH}/config.yaml")
+    BASE_CONFIG_PATH = CONFIG_PATH
+    USER_CONFIG_PATH = os.path.expanduser(f"{BASE_CONFIG_PATH}/config.yaml")
 
     CONFIG_KIND = "UserConfig"
 
@@ -51,6 +52,17 @@ class UserConfig:
 
             return UserConfig(current_client)
 
+    def load_or_create() -> Self:
+        """Check if a user config exists, otherwise create an empty one."""
+        if UserConfig.exists() is False:
+            if os.path.exists(UserConfig.BASE_CONFIG_PATH) is False:
+                os.makedirs(UserConfig.BASE_CONFIG_PATH)
+            config = UserConfig(None)
+            UserConfig.save(config)
+            return config
+        # Always return the current user config if it exists
+        return UserConfig.load()
+
     def save(config: Self, path: Optional[str] = None):
         """Save a user config as YAML."""
         value = {
@@ -62,7 +74,10 @@ class UserConfig:
         with open(path or UserConfig.USER_CONFIG_PATH, "w") as f:
             yaml.safe_dump(value, f, sort_keys=False)
 
-    def use_client(self, name: str):
+    def use_client(self, name: Optional[str]):
         """Updates the current client and saves the user config."""
-        self.current_client = ClientConfig.load(name)
+        if name is not None:
+            self.current_client = ClientConfig.load(name)
+        else:
+            self.current_client = None
         UserConfig.save(self)
