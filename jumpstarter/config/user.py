@@ -5,7 +5,7 @@ from typing import Optional, Self
 import yaml
 
 from .client import ClientConfig
-from .common import CONFIG_API_VERSION
+from .common import CONFIG_API_VERSION, CONFIG_PATH
 
 
 @dataclass
@@ -13,7 +13,7 @@ class UserConfig:
     """The user configuration for the Jumpstarter CLI."""
 
     # The user config path e.g. ~/.config/jumpstarter
-    USER_CONFIG_PATH = os.path.expanduser("~/.config/jumpstarter/config.yaml")
+    USER_CONFIG_PATH = os.path.expanduser(f"{CONFIG_PATH}/config.yaml")
 
     CONFIG_KIND = "UserConfig"
 

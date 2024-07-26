@@ -4,7 +4,7 @@ from typing import Optional, Self
 
 import yaml
 
-from .common import CONFIG_API_VERSION
+from .common import CONFIG_API_VERSION, CONFIG_PATH
 from .env import JMP_DRIVERS_ALLOW, JMP_ENDPOINT, JMP_TOKEN
 
 
@@ -34,7 +34,7 @@ class ClientConfig:
     """A Jumpstarter client configuration."""
 
     # The directory path for client configs
-    CLIENT_CONFIGS_PATH = os.path.expanduser("~/.config/jumpstarter/clients")
+    CLIENT_CONFIGS_PATH = os.path.expanduser(f"{CONFIG_PATH}/clients")
 
     CONFIG_KIND = "Client"
 
@@ -49,6 +49,9 @@ class ClientConfig:
 
     drivers: ClientConfigDrivers
     """A client drivers configuration."""
+
+    path: Optional[str] = None
+    """The path the config was loaded from."""
 
     def _get_path(name: str) -> str:
         """Get the regular path of a client config given a name."""
@@ -83,7 +86,7 @@ class ClientConfig:
         # Split allowed driver packages as a comma-separated list
         drivers = ClientConfigDrivers(drivers_val.split(",") if allow_unsafe is False else [], allow_unsafe)
 
-        return ClientConfig("default", token, endpoint, drivers)
+        return ClientConfig("default", token, endpoint, drivers, None)
 
     def from_file(path: str) -> Self:
         """Constructs a client config from a YAML file."""
@@ -116,7 +119,8 @@ class ClientConfig:
 
             drivers = ClientConfigDrivers.from_dict(drivers_val)
 
-            return ClientConfig(name, token, endpoint, drivers)
+            config = ClientConfig(name, token, endpoint, drivers, path)
+            return config
 
     def load(name: str) -> Self:
         """Load a client config by name."""

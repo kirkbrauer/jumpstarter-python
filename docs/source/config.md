@@ -111,7 +111,7 @@ All client configurations can be listed with `jmp client list`:
 
 ```bash
 $ jmp client list
-CURRENT   NAME       ENDPOINT                               LOCATION
+CURRENT   NAME       ENDPOINT                               PATH
 *         default    grpcs://jumpstarter1.my-lab.com:1443   /home/jdoe/.config/jumpstarter/clients/default.yaml
           myclient   grpcs://jumpstarter2.my-lab.com:1443   /home/jdoe/.config/jumpstarter/clients/myclient.yaml
           another    grpcs://jumpstarter3.my-lab.com:1443   /home/jdoe/.config/jumpstarter/clients/another.yaml
@@ -224,7 +224,7 @@ All exporter configurations can be listed with `jmp exporter list`:
 
 ```bash
 $ jmp exporter list
-CURRENT   NAME         ENDPOINT                               LOCATION                                           SCRIPT
+CURRENT   NAME         ENDPOINT                               PATH                                           SCRIPT
 *         default      grpcs://jumpstarter1.my-lab.com:1443   /etc/jumpstarter/exporters/default.yaml            N/A
           myexporter   grpcs://jumpstarter2.my-lab.com:1443   /etc/jumpstarter/exporters/myexporter.yaml         N/A
           another      grpcs://jumpstarter3.my-lab.com:1443   /etc/jumpstarter/exporters/another/exporter.yaml   /etc/jumpstarter/exporters/another/setup.py
